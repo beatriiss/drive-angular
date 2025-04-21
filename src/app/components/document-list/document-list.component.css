@@ -1,0 +1,39 @@
+.document-list {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.grid-view {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.list-view .list-header {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr;
+  padding: 0 16px;
+  height: 48px;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+  color: #5f6368;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.list-view .list-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-view .list-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.no-documents {
+  width: 100%;
+  text-align: center;
+  margin-top: 40px;
+  color: #5f6368;
+  font-size: 14px;
+}

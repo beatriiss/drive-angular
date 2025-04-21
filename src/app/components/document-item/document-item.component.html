@@ -1,0 +1,24 @@
+<div class="document-item" [class.grid-item]="viewMode === 'grid'" [class.list-item]="viewMode === 'list'">
+  <!-- Visualização em Grade -->
+  <div *ngIf="viewMode === 'grid'" class="grid-view-item">
+    <div class="document-icon">
+      <i class="material-icons">{{ getFileIcon() }}</i>
+    </div>
+    <div class="document-name" [title]="document.name">{{ document.name }}</div>
+    <div class="document-shared" *ngIf="document.shared">
+      <i class="material-icons">people</i>
+    </div>
+  </div>
+
+  <!-- Visualização em Lista -->
+  <div *ngIf="viewMode === 'list'" class="list-view-item">
+    <div class="list-name">
+      <i class="material-icons">{{ getFileIcon() }}</i>
+      <span>{{ document.name }}</span>
+      <i *ngIf="document.shared" class="material-icons shared-icon">people</i>
+    </div>
+    <div class="list-owner">{{ document.owner }}</div>
+    <div class="list-modified">{{ getModifiedDate() }}</div>
+    <div class="list-size">{{ getFileSize() }}</div>
+  </div>
+</div>

@@ -1,0 +1,134 @@
+.document-item {
+  cursor: pointer;
+}
+
+/* Estilo para visualização em Grade */
+.grid-item {
+  width: 200px;
+  height: 200px;
+  margin: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  transition: box-shadow 0.2s;
+}
+
+.grid-item:hover {
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,0.30), 0 1px 3px 1px rgba(60,64,67,0.15);
+}
+
+.grid-view-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+
+.document-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+
+.document-icon .material-icons {
+  font-size: 64px;
+  color: #5f6368;
+}
+
+.document-icon .material-icons[innerText="folder"] {
+  color: #ffe082;
+}
+
+.document-icon .material-icons[innerText="description"] {
+  color: #4285f4;
+}
+
+.document-icon .material-icons[innerText="table_chart"] {
+  color: #0f9d58;
+}
+
+.document-icon .material-icons[innerText="slideshow"] {
+  color: #f4b400;
+}
+
+.document-name {
+  font-size: 14px;
+  color: #3c4043;
+  text-align: center;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-shared {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.document-shared .material-icons {
+  font-size: 16px;
+  color: #5f6368;
+}
+
+/* Estilo para visualização em Lista */
+.list-item {
+  width: 100%;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.list-item:hover {
+  background-color: #f1f3f4;
+}
+
+.list-view-item {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr;
+  padding: 0 16px;
+  height: 48px;
+  align-items: center;
+}
+
+.list-name {
+  display: flex;
+  align-items: center;
+}
+
+.list-name .material-icons {
+  margin-right: 12px;
+  font-size: 20px;
+  color: #5f6368;
+}
+
+.list-name .material-icons[innerText="folder"] {
+  color: #ffe082;
+}
+
+.list-name .material-icons[innerText="description"] {
+  color: #4285f4;
+}
+
+.list-name span {
+  font-size: 14px;
+  color: #3c4043;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-owner, .list-modified, .list-size {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.shared-icon {
+  font-size: 16px;
+  color: #5f6368;
+  margin-left: 8px;
+}

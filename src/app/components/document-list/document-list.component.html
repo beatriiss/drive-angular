@@ -1,0 +1,21 @@
+<div class="document-list" [class.grid-view]="viewMode === 'grid'" [class.list-view]="viewMode === 'list'">
+  <div class="list-header" *ngIf="viewMode === 'list'">
+    <div class="header-name">Nome</div>
+    <div class="header-owner">Proprietário</div>
+    <div class="header-modified">Última modificação</div>
+    <div class="header-size">Tamanho do arquivo</div>
+  </div>
+
+  <div class="list-content">
+    <app-document-item
+      *ngFor="let doc of documents"
+      [document]="doc"
+      [viewMode]="viewMode"
+      (click)="openDocument(doc)">
+    </app-document-item>
+
+    <div *ngIf="documents.length === 0" class="no-documents">
+      Nenhum item encontrado
+    </div>
+  </div>
+</div>
