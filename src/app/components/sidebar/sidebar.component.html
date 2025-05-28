@@ -1,46 +1,66 @@
-<div class="drive-sidebar">
-  <div class="create-button">
-    <button>
-      <svg viewBox="0 0 36 36">
-        <path d="M16 16v14h4V20h10v-4H16z"></path>
-        <path d="M16 16V6h4v10h-4z"></path>
-        <path d="M16 16H6v4h10v-4z"></path>
-      </svg>
-      <span>Novo</span>
-    </button>
+<div class="bg-white border-end m-0 p-0" style="width: 256px; height: 100vh;">
+  <!-- Create Button -->
+  <div class="p-3">
+    <div class="dropdown">
+      <button class="btn btn-light border rounded-pill d-flex align-items-center px-4 py-2 w-100"
+              type="button"
+              (click)="toggleCreateMenu()">
+        <span class="material-symbols-outlined me-3 text-primary">add</span>
+        <span class="fw-medium">Novo</span>
+      </button>
+
+      <!-- Create Menu Dropdown -->
+      <div class="dropdown-menu show mt-2 m-0" *ngIf="showCreateMenu" style="position: static; width: 100%;">
+        <button class="dropdown-item d-flex align-items-center py-2" (click)="createNewFolder()">
+          <span class="material-symbols-outlined me-3 text-muted">create_new_folder</span>
+          <span>Nova Pasta</span>
+        </button>
+        <button class="dropdown-item d-flex align-items-center py-2" (click)="uploadFile()">
+          <span class="material-symbols-outlined me-3 text-muted">upload_file</span>
+          <span>Upload de Arquivo</span>
+        </button>
+        <button class="dropdown-item d-flex align-items-center py-2">
+          <span class="material-symbols-outlined me-3 text-muted">description</span>
+          <span>Documento Google</span>
+        </button>
+        <button class="dropdown-item d-flex align-items-center py-2">
+          <span class="material-symbols-outlined me-3 text-muted">grid_on</span>
+          <span>Planilha Google</span>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <nav class="nav-items">
-    <div class="nav-item" [class.active]="currentPath === '/'" (click)="navigateTo('/')">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"></path>
-      </svg>
-      <span>Meu Drive</span>
-    </div>
+  <!-- Navigation Items -->
+  <nav class="px-2 m-0">
+    <div class="list-group list-group-flush m-0">
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+              [class.active]="currentViewType === 'all'"
+              (click)="navigateTo('/')">
+        <span class="material-symbols-outlined me-3 text-muted">folder</span>
+        <span>Meu Drive</span>
+      </button>
 
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+              [class.active]="currentViewType === 'recent'"
+              (click)="showRecent()">
+        <span class="material-symbols-outlined me-3 text-muted">schedule</span>
+        <span>Recentes</span>
+      </button>
 
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path>
-      </svg>
-      <span>Recentes</span>
-    </div>
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+              [class.active]="currentViewType === 'starred'"
+              (click)="showStarred()">
+        <span class="material-symbols-outlined me-3 text-muted">star</span>
+        <span>Com estrela</span>
+      </button>
 
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-      </svg>
-      <span>Com estrela</span>
-    </div>
-
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13z"></path>
-        <path d="M9 8h2v9H9zm4 0h2v9h-2z"></path>
-      </svg>
-      <span>Lixeira</span>
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+              [class.active]="currentViewType === 'trash'"
+              (click)="showTrash()">
+        <span class="material-symbols-outlined me-3 text-muted">delete</span>
+        <span>Lixeira</span>
+      </button>
     </div>
   </nav>
-
-
 </div>

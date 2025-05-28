@@ -5,6 +5,16 @@
       <i class="material-icons">{{ getFileIcon() }}</i>
     </div>
     <div class="document-name" [title]="document.name">{{ document.name }}</div>
+
+    <div class="document-actions">
+      <div class="action-button star-button" [class.starred]="document.starred" (click)="toggleStar($event)" title="Favoritar">
+        <i class="material-icons">{{ document.starred ? 'star' : 'star_border' }}</i>
+      </div>
+      <div class="action-button" (click)="deleteDocument($event)" title="Excluir">
+        <i class="material-icons">delete</i>
+      </div>
+    </div>
+
     <div class="document-shared" *ngIf="document.shared">
       <i class="material-icons">people</i>
     </div>
@@ -20,5 +30,14 @@
     <div class="list-owner">{{ document.owner }}</div>
     <div class="list-modified">{{ getModifiedDate() }}</div>
     <div class="list-size">{{ getFileSize() }}</div>
+
+    <div class="list-actions">
+      <div class="action-button star-button" [class.starred]="document.starred" (click)="toggleStar($event)" title="Favoritar">
+        <i class="material-icons">{{ document.starred ? 'star' : 'star_border' }}</i>
+      </div>
+      <div class="action-button" (click)="deleteDocument($event)" title="Excluir">
+        <i class="material-icons">delete</i>
+      </div>
+    </div>
   </div>
 </div>

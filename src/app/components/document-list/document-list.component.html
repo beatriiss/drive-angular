@@ -1,9 +1,14 @@
 <div class="document-list" [class.grid-view]="viewMode === 'grid'" [class.list-view]="viewMode === 'list'">
+  <div class="view-title">
+    <h2>{{ getViewTypeTitle() }}</h2>
+  </div>
+
   <div class="list-header" *ngIf="viewMode === 'list'">
     <div class="header-name">Nome</div>
     <div class="header-owner">Proprietário</div>
     <div class="header-modified">Última modificação</div>
     <div class="header-size">Tamanho do arquivo</div>
+    <div class="header-actions">Ações</div>
   </div>
 
   <div class="list-content">
@@ -15,7 +20,18 @@
     </app-document-item>
 
     <div *ngIf="documents.length === 0" class="no-documents">
-      Nenhum item encontrado
+      <div *ngIf="viewType === 'all'">
+        Nenhum item encontrado nesta pasta
+      </div>
+      <div *ngIf="viewType === 'recent'">
+        Nenhum item recente encontrado
+      </div>
+      <div *ngIf="viewType === 'starred'">
+        Nenhum item com estrela encontrado
+      </div>
+      <div *ngIf="viewType === 'trash'">
+        A lixeira está vazia
+      </div>
     </div>
   </div>
 </div>

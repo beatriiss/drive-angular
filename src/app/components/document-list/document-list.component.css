@@ -1,16 +1,28 @@
 .document-list {
   padding: 16px;
   overflow-y: auto;
+  height: calc(100vh - 112px);
+}
+
+.view-title {
+  margin-bottom: 16px;
+}
+
+.view-title h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #3c4043;
+  margin: 0;
 }
 
 .grid-view {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
 .list-view .list-header {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr 1fr 80px;
   padding: 0 16px;
   height: 48px;
   align-items: center;
@@ -36,4 +48,7 @@
   margin-top: 40px;
   color: #5f6368;
   font-size: 14px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }

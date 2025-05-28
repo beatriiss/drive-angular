@@ -26,6 +26,17 @@
   margin: 0 4px;
 }
 
+.breadcrumb-item {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.breadcrumb-item:hover {
+  background-color: #f1f3f4;
+}
+
 .toolbar-right {
   display: flex;
   align-items: center;

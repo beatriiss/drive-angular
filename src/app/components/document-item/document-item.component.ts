@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Document } from '../../models/document.model';
+import { DocumentService } from '../../services/document.service';
 
 @Component({
   selector: 'app-document-item',
@@ -12,6 +13,8 @@ import { Document } from '../../models/document.model';
 export class DocumentItemComponent {
   @Input() document!: Document;
   @Input() viewMode: 'grid' | 'list' = 'grid';
+
+  constructor(private documentService: DocumentService) {}
 
   getFileIcon(): string {
     switch(this.document.type) {
@@ -47,5 +50,17 @@ export class DocumentItemComponent {
   getModifiedDate(): string {
     const date = this.document.modifiedAt;
     return date.toLocaleDateString('pt-BR');
+  }
+
+  toggleStar(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent opening the document
+    this.documentService.toggleStar(this.document.id);
+  }
+
+  deleteDocument(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent opening the document
+    if (confirm(`Tem certeza que deseja excluir "${this.document.name}"?`)) {
+      this.documentService.deleteDocument(this.document.id);
+    }
   }
 }

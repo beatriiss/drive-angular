@@ -11,6 +11,7 @@
   overflow: hidden;
   border: 1px solid #e0e0e0;
   transition: box-shadow 0.2s;
+  position: relative;
 }
 
 .grid-item:hover {
@@ -77,6 +78,43 @@
   color: #5f6368;
 }
 
+/* Document Actions */
+.document-actions {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: none;
+}
+
+.grid-item:hover .document-actions {
+  display: flex;
+}
+
+.action-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.8);
+  margin-left: 4px;
+}
+
+.action-button:hover {
+  background-color: #f1f3f4;
+}
+
+.action-button .material-icons {
+  font-size: 18px;
+  color: #5f6368;
+}
+
+.star-button.starred .material-icons {
+  color: #f4b400;
+}
+
 /* Estilo para visualização em Lista */
 .list-item {
   width: 100%;
@@ -89,7 +127,7 @@
 
 .list-view-item {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr 1fr 80px;
   padding: 0 16px;
   height: 48px;
   align-items: center;
@@ -131,4 +169,15 @@
   font-size: 16px;
   color: #5f6368;
   margin-left: 8px;
+}
+
+/* List View Actions */
+.list-actions {
+  display: flex;
+  align-items: center;
+  visibility: hidden;
+}
+
+.list-item:hover .list-actions {
+  visibility: visible;
 }
