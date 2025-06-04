@@ -1,11 +1,19 @@
 <app-header></app-header>
 
-<div class="app-container">
-  <app-sidebar></app-sidebar>
+<div class="d-flex vh-100">
+  <!-- Sidebar fixa -->
+  <div class="position-fixed top-0 start-0 bg-white border-end"
+       style="margin-top: 64px; width: 256px; height: calc(100vh - 64px); z-index: 1000;">
+    <app-sidebar></app-sidebar>
+  </div>
 
-  <div class="content-area">
+  <!-- Conteúdo principal -->
+  <div class="flex-grow-1 d-flex flex-column bg-light"
+       style="margin-left: 256px;">
     <app-toolbar></app-toolbar>
-    <app-document-list></app-document-list>
+    <div class="flex-grow-1 overflow-auto">
+      <app-document-list></app-document-list>
+    </div>
   </div>
 </div>
 

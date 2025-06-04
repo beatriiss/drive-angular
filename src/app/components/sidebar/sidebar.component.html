@@ -32,30 +32,30 @@
   </div>
 
   <!-- Navigation Items -->
-  <nav class="px-2 m-0">
+  <nav class="px-4 m-0">
     <div class="list-group list-group-flush m-0">
-      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mb-1 d-flex align-items-center py-3"
               [class.active]="currentViewType === 'all'"
               (click)="navigateTo('/')">
         <span class="material-symbols-outlined me-3 text-muted">folder</span>
         <span>Meu Drive</span>
       </button>
 
-      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mb-1 d-flex align-items-center py-3"
               [class.active]="currentViewType === 'recent'"
               (click)="showRecent()">
         <span class="material-symbols-outlined me-3 text-muted">schedule</span>
         <span>Recentes</span>
       </button>
 
-      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mb-1 d-flex align-items-center py-3"
               [class.active]="currentViewType === 'starred'"
               (click)="showStarred()">
         <span class="material-symbols-outlined me-3 text-muted">star</span>
         <span>Com estrela</span>
       </button>
 
-      <button class="list-group-item list-group-item-action border-0 rounded-pill mx-2 mb-1 d-flex align-items-center py-2"
+      <button class="list-group-item list-group-item-action border-0 rounded-pill mb-1 d-flex align-items-center py-3"
               [class.active]="currentViewType === 'trash'"
               (click)="showTrash()">
         <span class="material-symbols-outlined me-3 text-muted">delete</span>

@@ -1,36 +1,55 @@
-<div class="document-list" [class.grid-view]="viewMode === 'grid'" [class.list-view]="viewMode === 'list'">
-  <div class="view-title">
-    <h2>{{ getViewTypeTitle() }}</h2>
+<div class="container-fluid p-4"
+     [class.row]="viewMode === 'grid'"
+     [class.d-flex]="viewMode === 'list'"
+     [class.flex-column]="viewMode === 'list'">
+
+  <div class="mb-0">
+    <h2 class="h4 mb-0">{{ getViewTypeTitle() }}</h2>
   </div>
 
-  <div class="list-header" *ngIf="viewMode === 'list'">
-    <div class="header-name">Nome</div>
-    <div class="header-owner">Proprietário</div>
-    <div class="header-modified">Última modificação</div>
-    <div class="header-size">Tamanho do arquivo</div>
-    <div class="header-actions">Ações</div>
+  <!-- Header para view em lista -->
+  <div class="d-none d-md-flex bg-light border rounded p-2 mb-2"
+       *ngIf="viewMode === 'list'">
+    <div class="col-4 fw-bold">Nome</div>
+    <div class="col-2 fw-bold">Proprietário</div>
+    <div class="col-2 fw-bold">Última modificação</div>
+    <div class="col-2 fw-bold">Tamanho do arquivo</div>
+    <div class="col-2 fw-bold text-end">Ações</div>
   </div>
 
-  <div class="list-content">
+  <!-- Conteúdo da lista -->
+  <div class="flex-grow-1"
+       [class.row]="viewMode === 'grid'"
+       [class.g-3]="viewMode === 'grid'">
+
     <app-document-item
       *ngFor="let doc of documents"
       [document]="doc"
       [viewMode]="viewMode"
+      [class.col-12]="viewMode === 'list'"
+      [class.col-xl-2]="viewMode === 'grid'"
+      [class.col-lg-3]="viewMode === 'grid'"
+      [class.col-md-4]="viewMode === 'grid'"
+      [class.col-sm-6]="viewMode === 'grid'"
       (click)="openDocument(doc)">
     </app-document-item>
 
-    <div *ngIf="documents.length === 0" class="no-documents">
-      <div *ngIf="viewType === 'all'">
-        Nenhum item encontrado nesta pasta
-      </div>
-      <div *ngIf="viewType === 'recent'">
-        Nenhum item recente encontrado
-      </div>
-      <div *ngIf="viewType === 'starred'">
-        Nenhum item com estrela encontrado
-      </div>
-      <div *ngIf="viewType === 'trash'">
-        A lixeira está vazia
+    <!-- Mensagens quando não há documentos -->
+    <div class="col-12 text-center py-5" *ngIf="documents.length === 0">
+      <div class="text-muted">
+        <i class="bi bi-folder2-open fs-1 d-block mb-3"></i>
+        <div *ngIf="viewType === 'all'" class="h5">
+          Nenhum item encontrado nesta pasta
+        </div>
+        <div *ngIf="viewType === 'recent'" class="h5">
+          Nenhum item recente encontrado
+        </div>
+        <div *ngIf="viewType === 'starred'" class="h5">
+          Nenhum item com estrela encontrado
+        </div>
+        <div *ngIf="viewType === 'trash'" class="h5">
+          A lixeira está vazia
+        </div>
       </div>
     </div>
   </div>
