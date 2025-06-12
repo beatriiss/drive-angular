@@ -9,7 +9,7 @@ const { testDatabaseConnection } = require('./src/config/database');
 const fileRoutes = require('./src/routes/fileRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3333;
 
 // Middlewares globais
 app.use(cors());
