@@ -15,20 +15,34 @@
           <span class="material-symbols-outlined me-3 text-muted">create_new_folder</span>
           <span>Nova Pasta</span>
         </button>
+        <div class="dropdown-divider"></div>
         <button class="dropdown-item d-flex align-items-center py-2" (click)="uploadFile()">
           <span class="material-symbols-outlined me-3 text-muted">upload_file</span>
           <span>Upload de Arquivo</span>
         </button>
-        <button class="dropdown-item d-flex align-items-center py-2">
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item d-flex align-items-center py-2" (click)="createGoogleDoc()">
           <span class="material-symbols-outlined me-3 text-muted">description</span>
           <span>Documento Google</span>
         </button>
-        <button class="dropdown-item d-flex align-items-center py-2">
+        <button class="dropdown-item d-flex align-items-center py-2" (click)="createGoogleSheet()">
           <span class="material-symbols-outlined me-3 text-muted">grid_on</span>
           <span>Planilha Google</span>
         </button>
+        <button class="dropdown-item d-flex align-items-center py-2" (click)="createGoogleSlides()">
+          <span class="material-symbols-outlined me-3 text-muted">slideshow</span>
+          <span>Apresentação Google</span>
+        </button>
       </div>
     </div>
+
+    <!-- Input de arquivo escondido -->
+    <input #fileInput
+           type="file"
+           style="display: none;"
+           (change)="onFileSelected($event)"
+           accept="*/*"
+           multiple="false">
   </div>
 
   <!-- Navigation Items -->

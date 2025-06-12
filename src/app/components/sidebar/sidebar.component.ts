@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DocumentService } from '../../services/document.service';
 
@@ -13,6 +13,9 @@ export class SidebarComponent implements OnInit {
   currentPath: string = '/';
   currentViewType: 'all' | 'recent' | 'starred' | 'trash' = 'all';
   showCreateMenu = false;
+
+  // Referência para o input de arquivo (hidden)
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(private documentService: DocumentService) {}
 
@@ -48,25 +51,76 @@ export class SidebarComponent implements OnInit {
 
   createNewFolder(): void {
     const folderName = prompt('Nome da nova pasta:');
-    if (folderName) {
-      this.documentService.createFolder(folderName);
+    if (folderName && folderName.trim()) {
+      this.documentService.createFolder(folderName.trim());
     }
     this.showCreateMenu = false;
   }
 
+  /**
+   * Abrir seletor de arquivo
+   */
   uploadFile(): void {
-    // In a real application, this would open a file picker
-    // For demo purposes, we'll simulate a file upload
-    const fileTypes = [
-      { name: 'Relatório Final.docx', type: 'document', size: 2560000 },
-      { name: 'Dados Financeiros.xlsx', type: 'spreadsheet', size: 1840000 },
-      { name: 'Apresentação Cliente.pptx', type: 'presentation', size: 4230000 },
-      { name: 'Diagrama.jpg', type: 'image', size: 850000 },
-      { name: 'Contrato.pdf', type: 'pdf', size: 1200000 }
-    ];
+    console.log('📁 Abrindo seletor de arquivo...');
+    this.fileInput.nativeElement.click();
+    this.showCreateMenu = false;
+  }
 
-    const randomFile = fileTypes[Math.floor(Math.random() * fileTypes.length)];
-    this.documentService.uploadFile(randomFile);
+  /**
+   * Processar arquivo selecionado
+   */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      console.log('📄 Arquivo selecionado:', file.name, 'Tamanho:', file.size, 'Tipo:', file.type);
+
+      // Verificar tamanho (50MB max)
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      if (file.size > maxSize) {
+        alert('Arquivo muito grande! Máximo permitido: 50MB');
+        return;
+      }
+
+      // Fazer upload real
+      this.documentService.uploadFile(file);
+
+      // Limpar input para permitir upload do mesmo arquivo novamente se necessário
+      input.value = '';
+    }
+  }
+
+  /**
+   * Criar documento Google
+   */
+  createGoogleDoc(): void {
+    const docName = prompt('Nome do documento:');
+    if (docName && docName.trim()) {
+      this.documentService.createGoogleDocument(docName.trim(), 'document');
+    }
+    this.showCreateMenu = false;
+  }
+
+  /**
+   * Criar planilha Google
+   */
+  createGoogleSheet(): void {
+    const sheetName = prompt('Nome da planilha:');
+    if (sheetName && sheetName.trim()) {
+      this.documentService.createGoogleDocument(sheetName.trim(), 'spreadsheet');
+    }
+    this.showCreateMenu = false;
+  }
+
+  /**
+   * Criar apresentação Google
+   */
+  createGoogleSlides(): void {
+    const slidesName = prompt('Nome da apresentação:');
+    if (slidesName && slidesName.trim()) {
+      this.documentService.createGoogleDocument(slidesName.trim(), 'presentation');
+    }
     this.showCreateMenu = false;
   }
 }

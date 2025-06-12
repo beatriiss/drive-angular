@@ -3,8 +3,23 @@
      [class.d-flex]="viewMode === 'list'"
      [class.flex-column]="viewMode === 'list'">
 
-  <div class="mb-0">
-    <h2 class="h4 mb-0">{{ getViewTypeTitle() }}</h2>
+  <div class="mb-3 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <!-- Botão Voltar -->
+      <button *ngIf="canGoBack()"
+              class="btn btn-outline-secondary btn-sm me-3"
+              (click)="goBack()"
+              title="Voltar">
+        <i class="material-icons">arrow_back</i>
+      </button>
+
+      <h2 class="h4 mb-0">{{ getViewTypeTitle() }}</h2>
+    </div>
+
+    <!-- Info do path atual -->
+    <small class="text-muted" *ngIf="currentPath !== '/'">
+      📁 {{ currentPath }}
+    </small>
   </div>
 
   <!-- Header para view em lista -->
@@ -37,18 +52,26 @@
     <!-- Mensagens quando não há documentos -->
     <div class="col-12 text-center py-5" *ngIf="documents.length === 0">
       <div class="text-muted">
-        <i class="bi bi-folder2-open fs-1 d-block mb-3"></i>
-        <div *ngIf="viewType === 'all'" class="h5">
-          Nenhum item encontrado nesta pasta
+        <i class="material-icons" style="font-size: 64px;">folder_open</i>
+        <div class="mt-3">
+          <div *ngIf="viewType === 'all'" class="h5">
+            <span *ngIf="currentPath === '/'">Nenhum item encontrado nesta pasta</span>
+            <span *ngIf="currentPath !== '/'">A pasta "{{ getViewTypeTitle() }}" está vazia</span>
+          </div>
+          <div *ngIf="viewType === 'recent'" class="h5">
+            Nenhum item recente encontrado
+          </div>
+          <div *ngIf="viewType === 'starred'" class="h5">
+            Nenhum item com estrela encontrado
+          </div>
+          <div *ngIf="viewType === 'trash'" class="h5">
+            A lixeira está vazia
+          </div>
         </div>
-        <div *ngIf="viewType === 'recent'" class="h5">
-          Nenhum item recente encontrado
-        </div>
-        <div *ngIf="viewType === 'starred'" class="h5">
-          Nenhum item com estrela encontrado
-        </div>
-        <div *ngIf="viewType === 'trash'" class="h5">
-          A lixeira está vazia
+
+        <!-- Dica para criar primeira pasta/arquivo -->
+        <div *ngIf="viewType === 'all' && documents.length === 0" class="mt-3">
+          <p class="text-muted">Clique em "Novo" na barra lateral para criar sua primeira pasta ou fazer upload de um arquivo.</p>
         </div>
       </div>
     </div>

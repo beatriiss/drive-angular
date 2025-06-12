@@ -35,10 +35,11 @@ export class DocumentListComponent implements OnInit {
 
   openDocument(doc: Document): void {
     if (doc.type === 'folder') {
-      this.documentService.navigateToFolder(doc.path + '/' + doc.name);
+      console.log('📁 Abrindo pasta:', doc.name);
+      // Usar o novo método openFolder do service
+      this.documentService.openFolder(doc);
     } else {
-      // Lógica para abrir documento
-      console.log('Abrindo documento:', doc.name);
+      console.log('📄 Abrindo documento:', doc.name);
       alert(`Abrindo "${doc.name}"`);
     }
   }
@@ -65,5 +66,19 @@ export class DocumentListComponent implements OnInit {
   private getLastFolderName(path: string): string {
     const parts = path.split('/').filter(p => p);
     return parts.length > 0 ? parts[parts.length - 1] : 'Meu Drive';
+  }
+
+  /**
+   * Voltar para pasta pai
+   */
+  goBack(): void {
+    this.documentService.goBack();
+  }
+
+  /**
+   * Verificar se pode voltar
+   */
+  canGoBack(): boolean {
+    return this.currentPath !== '/' && this.viewType === 'all';
   }
 }
