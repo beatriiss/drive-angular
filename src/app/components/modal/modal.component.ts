@@ -29,7 +29,7 @@ export class ModalComponent implements OnChanges, OnDestroy {
   @Output() closed = new EventEmitter<void>();
 
   inputValue: string = '';
-  private isProcessingResult = false;
+  public isProcessingResult = false;
 
   ngOnChanges() {
     console.log('🎯 Modal mudou:', { isOpen: this.isOpen, title: this.config.title });

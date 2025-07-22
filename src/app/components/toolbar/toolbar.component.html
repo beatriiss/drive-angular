@@ -35,39 +35,7 @@
       </svg>
     </button>
 
-    <!-- Upload -->
-    <button class="btn btn-outline-secondary btn-sm p-2 border-0"
-            title="Fazer upload"
-            (click)="uploadFile()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"></path>
-      </svg>
-    </button>
 
-    <!-- Separador -->
-    <div class="vr mx-1"></div>
-
-    <!-- Visualização em lista -->
-    <button class="btn btn-outline-secondary btn-sm p-2 border-0"
-            [class.btn-primary]="viewMode === 'list'"
-            [class.text-white]="viewMode === 'list'"
-            (click)="toggleView()"
-            title="Visualização em lista">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"></path>
-      </svg>
-    </button>
-
-    <!-- Visualização em grade -->
-    <button class="btn btn-outline-secondary btn-sm p-2 border-0"
-            [class.btn-primary]="viewMode === 'grid'"
-            [class.text-white]="viewMode === 'grid'"
-            (click)="toggleView()"
-            title="Visualização em grade">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M3 3v8h8V3H3zm6 6H5V5h4v4zm-6 4v8h8v-8H3zm6 6H5v-4h4v4zm4-16v8h8V3h-8zm6 6h-4V5h4v4zm-6 4v8h8v-8h-8zm6 6h-4v-4h4v4z"></path>
-      </svg>
-    </button>
 
     <!-- Informações -->
     <button class="btn btn-outline-secondary btn-sm p-2 border-0"
