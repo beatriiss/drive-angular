@@ -31,7 +31,6 @@ app.get('/api/health', (req, res) => {
 // Inicialização
 const startServer = async () => {
   try {
-    await createDirectories();
     await testDatabaseConnection();
     
     app.listen(PORT, () => {
