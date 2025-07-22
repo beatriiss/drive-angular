@@ -58,18 +58,68 @@ class FileController {
   
   async listFiles(req, res) {
     try {
-      const { parent_id } = req.query;
+      const { parent_id, starred, trashed, recent, since, search } = req.query;
       
+      console.log('📋 Parâmetros recebidos:', { parent_id, starred, trashed, recent, since, search });
+      
+      // Se há busca por texto, usar método de search
+      if (search && search.trim()) {
+        const filters = {
+          starred: starred === 'true',
+          trashed: trashed === 'true'
+        };
+        
+        const files = await fileService.searchFiles(search.trim(), filters);
+        
+        return res.json({
+          success: true,
+          data: files,
+          message: `${files.length} resultados encontrados para "${search}"`
+        });
+      }
+      
+      // Preparar filtros baseados nos parâmetros
+      const filters = {};
+      
+      if (starred === 'true') {
+        filters.starred = true;
+      }
+      
+      if (trashed === 'true') {
+        filters.trashed = true;
+      }
+      
+      if (recent === 'true' && since) {
+        filters.recent = true;
+        filters.since = since;
+      }
+      
+      // Determinar parent_id
       let parentId = null;
-      if (parent_id && parent_id !== 'null') {
+      if (parent_id && parent_id !== 'null' && !filters.starred && !filters.trashed && !filters.recent) {
         parentId = parseInt(parent_id);
       }
       
-      const files = await fileService.getFilesByParent(parentId);
+      console.log('🔍 Buscando com filtros:', { parentId, filters });
+      
+      const files = await fileService.getFilesByParent(parentId, filters);
+      
+      // Mensagem de contexto baseada no filtro
+      let message = 'Arquivos carregados';
+      if (filters.starred) {
+        message = `${files.length} arquivos favoritados`;
+      } else if (filters.trashed) {
+        message = `${files.length} arquivos na lixeira`;
+      } else if (filters.recent) {
+        message = `${files.length} arquivos modificados recentemente`;
+      } else {
+        message = `${files.length} arquivos encontrados`;
+      }
       
       res.json({
         success: true,
-        data: files
+        data: files,
+        message: message
       });
     } catch (error) {
       console.error('Erro no controller - listFiles:', error);
@@ -241,6 +291,62 @@ class FileController {
       res.status(500).json({
         success: false,
         message: 'Erro ao excluir arquivo',
+        error: error.message
+      });
+    }
+  }
+
+  async restoreFile(req, res) {
+    try {
+      const { id } = req.params;
+      
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID inválido'
+        });
+      }
+      
+      const result = await fileService.restoreFile(parseInt(id));
+      
+      res.json({
+        success: true,
+        message: result.message
+      });
+      
+    } catch (error) {
+      console.error('Erro no controller - restoreFile:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro ao restaurar arquivo',
+        error: error.message
+      });
+    }
+  }
+
+  async permanentDeleteFile(req, res) {
+    try {
+      const { id } = req.params;
+      
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID inválido'
+        });
+      }
+      
+      const result = await fileService.permanentDeleteFile(parseInt(id));
+      
+      res.json({
+        success: true,
+        message: result.message
+      });
+      
+    } catch (error) {
+      console.error('Erro no controller - permanentDeleteFile:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro ao excluir permanentemente',
         error: error.message
       });
     }
