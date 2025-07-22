@@ -12,9 +12,17 @@
       <i class="material-icons text-muted" style="font-size: 24px;">people</i>
     </div>
 
+    <!-- Indicador se está na lixeira -->
+    <div class="position-absolute top-0 start-0 p-2" *ngIf="isInTrash()">
+      <i class="material-icons text-danger" style="font-size: 20px;">delete</i>
+    </div>
+
     <!-- Ícone do documento -->
     <div class="mb-3">
-      <i class="material-icons text-muted" style="font-size: 48px;">{{ getFileIcon() }}</i>
+      <i class="material-icons text-muted"
+         [class.text-muted]="!isInTrash()"
+         [class.text-secondary]="isInTrash()"
+         style="font-size: 48px;">{{ getFileIcon() }}</i>
     </div>
 
     <!-- Nome do documento -->
@@ -24,28 +32,47 @@
 
     <!-- Ações -->
     <div class="d-flex justify-content-center gap-1 mt-auto">
-      <button class="btn btn-sm p-1 border-0"
+      <!-- Botão de favorito - só aparece fora da lixeira -->
+      <button *ngIf="canToggleStar()"
+              class="btn btn-sm p-1 border-0"
               [class.text-warning]="document.starred"
               [class.text-muted]="!document.starred"
               (click)="toggleStar($event)"
               title="Favoritar">
         <i class="material-icons" style="font-size: 24px;">{{ document.starred ? 'star' : 'star_border' }}</i>
       </button>
-      <button class="btn btn-sm p-1 border-0 text-muted"
+
+      <!-- Botão de ação principal (delete/trash options) -->
+      <button class="btn btn-sm p-1 border-0"
+              [class.text-muted]="!isInTrash()"
+              [class.text-primary]="isInTrash()"
               (click)="deleteDocument($event)"
-              title="Excluir">
-        <i class="material-icons" style="font-size: 24px;">delete</i>
+              [title]="getActionTooltip()">
+        <i class="material-icons" style="font-size: 24px;">{{ getActionIcon() }}</i>
       </button>
     </div>
   </div>
 
   <!-- Visualização em Lista -->
-  <div *ngIf="viewMode === 'list'" class="d-flex align-items-center p-2 bg-white">
+  <div *ngIf="viewMode === 'list'" class="d-flex align-items-center p-2 bg-white"
+       [class.bg-light]="isInTrash()">
+
     <!-- Nome com ícone -->
     <div class="col-4 d-flex align-items-center">
-      <i class="material-icons me-2 text-muted">{{ getFileIcon() }}</i>
-      <span class="text-truncate">{{ document.name }}</span>
-      <i *ngIf="document.shared" class="material-icons ms-2 text-muted" style="font-size: 24px;">people</i>
+      <!-- Indicador de lixeira -->
+      <i *ngIf="isInTrash()" class="material-icons me-1 text-danger" style="font-size: 18px;">delete</i>
+
+      <!-- Ícone do arquivo -->
+      <i class="material-icons me-2"
+         [class.text-muted]="!isInTrash()"
+         [class.text-secondary]="isInTrash()">{{ getFileIcon() }}</i>
+
+      <!-- Nome do arquivo -->
+      <span class="text-truncate"
+            [class.text-muted]="isInTrash()">{{ document.name }}</span>
+
+      <!-- Indicador de compartilhamento -->
+      <i *ngIf="document.shared" class="material-icons ms-2 text-muted" style="font-size: 20px;">people</i>
     </div>
 
     <!-- Proprietário -->
@@ -66,17 +93,23 @@
     <!-- Ações -->
     <div class="col-2 d-flex justify-content-end">
       <div class="d-flex gap-1">
-        <button class="btn btn-sm p-1 border-0"
+        <!-- Botão de favorito - só aparece fora da lixeira -->
+        <button *ngIf="canToggleStar()"
+                class="btn btn-sm p-1 border-0"
                 [class.text-warning]="document.starred"
                 [class.text-muted]="!document.starred"
                 (click)="toggleStar($event)"
                 title="Favoritar">
-          <i class="material-icons" style="font-size: 24px;">{{ document.starred ? 'star' : 'star_border' }}</i>
+          <i class="material-icons" style="font-size: 20px;">{{ document.starred ? 'star' : 'star_border' }}</i>
         </button>
-        <button class="btn btn-sm p-1 border-0 text-muted"
+
+        <!-- Botão de ação principal -->
+        <button class="btn btn-sm p-1 border-0"
+                [class.text-muted]="!isInTrash()"
+                [class.text-primary]="isInTrash()"
                 (click)="deleteDocument($event)"
-                title="Excluir">
-          <i class="material-icons" style="font-size: 24px;">delete</i>
+                [title]="getActionTooltip()">
+          <i class="material-icons" style="font-size: 20px;">{{ getActionIcon() }}</i>
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DocumentService } from '../../services/document.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,7 +18,10 @@ export class SidebarComponent implements OnInit {
   // Referência para o input de arquivo (hidden)
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
-  constructor(private documentService: DocumentService) {}
+  constructor(
+    private documentService: DocumentService,
+    private modalService: ModalService
+  ) {}
 
   ngOnInit(): void {
     this.documentService.getCurrentPath().subscribe(path => {
@@ -49,11 +53,27 @@ export class SidebarComponent implements OnInit {
     this.showCreateMenu = !this.showCreateMenu;
   }
 
-  createNewFolder(): void {
-    const folderName = prompt('Nome da nova pasta:');
-    if (folderName && folderName.trim()) {
-      this.documentService.createFolder(folderName.trim());
+  async createNewFolder(): Promise<void> {
+    try {
+      const folderName = await this.modalService.promptFolderName();
+
+      if (folderName) {
+        console.log('📁 Criando pasta:', folderName);
+
+        // Aguardar resultado da API
+        const result = await this.documentService.createFolder(folderName);
+
+        if (result.success) {
+          await this.modalService.showSuccess(result.message);
+        } else {
+          await this.modalService.showError(result.message);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao criar pasta:', error);
+      await this.modalService.showError('Erro inesperado ao criar pasta. Tente novamente.');
     }
+
     this.showCreateMenu = false;
   }
 
@@ -69,7 +89,7 @@ export class SidebarComponent implements OnInit {
   /**
    * Processar arquivo selecionado
    */
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
 
     if (input.files && input.files.length > 0) {
@@ -79,12 +99,24 @@ export class SidebarComponent implements OnInit {
       // Verificar tamanho (50MB max)
       const maxSize = 50 * 1024 * 1024; // 50MB
       if (file.size > maxSize) {
-        alert('Arquivo muito grande! Máximo permitido: 50MB');
+        await this.modalService.showError('Arquivo muito grande! Máximo permitido: 50MB');
         return;
       }
 
       // Fazer upload real
-      this.documentService.uploadFile(file);
+      try {
+        console.log('📤 Iniciando upload...');
+        const result = await this.documentService.uploadFile(file);
+
+        if (result.success) {
+          await this.modalService.showSuccess(result.message);
+        } else {
+          await this.modalService.showError(result.message);
+        }
+      } catch (error) {
+        console.error('Erro no upload:', error);
+        await this.modalService.showError('Erro inesperado no upload. Tente novamente.');
+      }
 
       // Limpar input para permitir upload do mesmo arquivo novamente se necessário
       input.value = '';
@@ -94,33 +126,78 @@ export class SidebarComponent implements OnInit {
   /**
    * Criar documento Google
    */
-  createGoogleDoc(): void {
-    const docName = prompt('Nome do documento:');
-    if (docName && docName.trim()) {
-      this.documentService.createGoogleDocument(docName.trim(), 'document');
+  async createGoogleDoc(): Promise<void> {
+    try {
+      const docName = await this.modalService.promptDocumentName('document');
+
+      if (docName) {
+        console.log('📄 Criando documento:', docName);
+
+        const result = await this.documentService.createGoogleDocument(docName, 'document');
+
+        if (result.success) {
+          await this.modalService.showSuccess(result.message);
+        } else {
+          await this.modalService.showError(result.message);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao criar documento:', error);
+      await this.modalService.showError('Erro inesperado ao criar documento. Tente novamente.');
     }
+
     this.showCreateMenu = false;
   }
 
   /**
    * Criar planilha Google
    */
-  createGoogleSheet(): void {
-    const sheetName = prompt('Nome da planilha:');
-    if (sheetName && sheetName.trim()) {
-      this.documentService.createGoogleDocument(sheetName.trim(), 'spreadsheet');
+  async createGoogleSheet(): Promise<void> {
+    try {
+      const sheetName = await this.modalService.promptDocumentName('spreadsheet');
+
+      if (sheetName) {
+        console.log('📊 Criando planilha:', sheetName);
+
+        const result = await this.documentService.createGoogleDocument(sheetName, 'spreadsheet');
+
+        if (result.success) {
+          await this.modalService.showSuccess(result.message);
+        } else {
+          await this.modalService.showError(result.message);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao criar planilha:', error);
+      await this.modalService.showError('Erro inesperado ao criar planilha. Tente novamente.');
     }
+
     this.showCreateMenu = false;
   }
 
   /**
    * Criar apresentação Google
    */
-  createGoogleSlides(): void {
-    const slidesName = prompt('Nome da apresentação:');
-    if (slidesName && slidesName.trim()) {
-      this.documentService.createGoogleDocument(slidesName.trim(), 'presentation');
+  async createGoogleSlides(): Promise<void> {
+    try {
+      const slidesName = await this.modalService.promptDocumentName('presentation');
+
+      if (slidesName) {
+        console.log('🎞️ Criando apresentação:', slidesName);
+
+        const result = await this.documentService.createGoogleDocument(slidesName, 'presentation');
+
+        if (result.success) {
+          await this.modalService.showSuccess(result.message);
+        } else {
+          await this.modalService.showError(result.message);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao criar apresentação:', error);
+      await this.modalService.showError('Erro inesperado ao criar apresentação. Tente novamente.');
     }
+
     this.showCreateMenu = false;
   }
 }

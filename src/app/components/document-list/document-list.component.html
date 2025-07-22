@@ -17,8 +17,16 @@
     </div>
 
     <!-- Info do path atual -->
-    <small class="text-muted" *ngIf="currentPath !== '/'">
+    <small class="text-muted" *ngIf="currentPath !== '/' && viewType === 'all'">
       📁 {{ currentPath }}
+    </small>
+
+    <!-- Info da visualização especial -->
+    <small class="text-info" *ngIf="viewType !== 'all'">
+      <i class="material-icons" style="font-size: 16px;">
+        {{ getViewTypeIcon() }}
+      </i>
+      {{ getViewTypeDescription() }}
     </small>
   </div>
 
@@ -41,6 +49,7 @@
       *ngFor="let doc of documents"
       [document]="doc"
       [viewMode]="viewMode"
+      [viewType]="viewType"
       [class.col-12]="viewMode === 'list'"
       [class.col-xl-2]="viewMode === 'grid'"
       [class.col-lg-3]="viewMode === 'grid'"
@@ -52,26 +61,20 @@
     <!-- Mensagens quando não há documentos -->
     <div class="col-12 text-center py-5" *ngIf="documents.length === 0">
       <div class="text-muted">
-        <i class="material-icons" style="font-size: 64px;">folder_open</i>
+        <i class="material-icons" style="font-size: 64px;">{{ getEmptyStateIcon() }}</i>
         <div class="mt-3">
-          <div *ngIf="viewType === 'all'" class="h5">
-            <span *ngIf="currentPath === '/'">Nenhum item encontrado nesta pasta</span>
-            <span *ngIf="currentPath !== '/'">A pasta "{{ getViewTypeTitle() }}" está vazia</span>
-          </div>
-          <div *ngIf="viewType === 'recent'" class="h5">
-            Nenhum item recente encontrado
-          </div>
-          <div *ngIf="viewType === 'starred'" class="h5">
-            Nenhum item com estrela encontrado
-          </div>
-          <div *ngIf="viewType === 'trash'" class="h5">
-            A lixeira está vazia
-          </div>
+          <div class="h5">{{ getEmptyStateTitle() }}</div>
+          <p class="text-muted">{{ getEmptyStateMessage() }}</p>
         </div>
 
         <!-- Dica para criar primeira pasta/arquivo -->
         <div *ngIf="viewType === 'all' && documents.length === 0" class="mt-3">
           <p class="text-muted">Clique em "Novo" na barra lateral para criar sua primeira pasta ou fazer upload de um arquivo.</p>
+        </div>
+
+        <!-- Dica para lixeira vazia -->
+        <div *ngIf="viewType === 'trash' && documents.length === 0" class="mt-3">
+          <p class="text-muted">Quando você excluir arquivos, eles aparecerão aqui.</p>
         </div>
       </div>
     </div>

@@ -16,6 +16,14 @@
     </nav>
   </div>
 
+  <!-- Input de arquivo escondido -->
+  <input #fileInput
+         type="file"
+         style="display: none;"
+         (change)="onFileSelected($event)"
+         accept="*/*"
+         multiple="false">
+
   <!-- Lado direito - Botões de ação -->
   <div class="d-flex align-items-center gap-2">
     <!-- Nova pasta -->

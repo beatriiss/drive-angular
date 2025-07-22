@@ -5,6 +5,8 @@ import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { DocumentListComponent } from './components/document-list/document-list.component';
+import { ModalComponent } from './components/modal/modal.component';
+import { ModalService } from './services/modal.service';
 
 @Component({
   selector: 'drive-root',
@@ -15,7 +17,8 @@ import { DocumentListComponent } from './components/document-list/document-list.
     HeaderComponent,
     SidebarComponent,
     ToolbarComponent,
-    DocumentListComponent
+    DocumentListComponent,
+    ModalComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
@@ -23,4 +26,10 @@ import { DocumentListComponent } from './components/document-list/document-list.
 })
 export class AppComponent {
   title = 'drive-angular';
+
+  constructor(public modalService: ModalService) {}
+
+  onModalResult(result: { confirmed: boolean; value?: string }) {
+    this.modalService.handleModalResult(result);
+  }
 }

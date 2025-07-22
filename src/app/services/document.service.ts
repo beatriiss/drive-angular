@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, map } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, firstValueFrom } from 'rxjs';
 import { Document } from '../models/document.model';
+import { ModalService } from './modal.service';
 
 // Interface para resposta da API
 interface ApiResponse<T> {
@@ -38,20 +39,54 @@ export class DocumentService {
   private currentParentIdSubject = new BehaviorSubject<number | null>(null);
   private viewTypeSubject = new BehaviorSubject<'all' | 'recent' | 'starred' | 'trash'>('all');
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private modalService: ModalService
+  ) {
     this.loadDocumentsFromApi();
   }
 
   /**
-   * Carregar documentos da API
+   * Carregar documentos da API baseado no tipo de visualização
    */
-  private loadDocumentsFromApi(parentId?: number | null): void {
+  private loadDocumentsFromApi(parentId?: number | null, viewType?: 'all' | 'recent' | 'starred' | 'trash'): void {
     let params = new HttpParams();
-    if (parentId !== undefined && parentId !== null) {
-      params = params.set('parent_id', parentId.toString());
+
+    const currentViewType = viewType || this.viewTypeSubject.value;
+
+    // Para diferentes tipos de visualização, fazemos queries diferentes
+    switch (currentViewType) {
+      case 'all':
+        // Arquivos normais (não deletados) de uma pasta específica
+        if (parentId !== undefined && parentId !== null) {
+          params = params.set('parent_id', parentId.toString());
+        }
+        break;
+
+      case 'starred':
+        // Todos os arquivos favoritados (não deletados)
+        params = params.set('starred', 'true');
+        break;
+
+      case 'trash':
+        // Todos os arquivos deletados
+        params = params.set('trashed', 'true');
+        break;
+
+      case 'recent':
+        // Arquivos modificados recentemente (últimos 7 dias)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        params = params.set('recent', 'true');
+        params = params.set('since', sevenDaysAgo.toISOString());
+        break;
     }
 
-    console.log('🔄 Carregando documentos da API...', { parentId });
+    console.log('🔄 Carregando documentos da API...', {
+      parentId,
+      viewType: currentViewType,
+      params: params.toString()
+    });
 
     this.http.get<ApiResponse<ApiFile[]>>(this.baseUrl, { params })
       .pipe(
@@ -70,7 +105,7 @@ export class DocumentService {
       )
       .subscribe({
         next: (documents) => {
-          console.log('📄 Documentos carregados:', documents.length);
+          console.log('📄 Documentos carregados:', documents.length, 'Tipo:', currentViewType);
           this.documentsSubject.next(documents);
         },
         error: (error) => {
@@ -165,12 +200,27 @@ export class DocumentService {
     return this.viewTypeSubject.asObservable();
   }
 
+  /**
+   * Definir tipo de visualização e carregar dados correspondentes
+   */
   setViewType(viewType: 'all' | 'recent' | 'starred' | 'trash'): void {
+    console.log('📋 Mudando para visualização:', viewType);
+
     this.viewTypeSubject.next(viewType);
-    this.filterDocuments();
+
+    // Para views especiais, resetar path e parent
+    if (viewType !== 'all') {
+      this.currentPathSubject.next('/');
+      this.currentParentIdSubject.next(null);
+    }
+
+    // Carregar documentos do tipo específico
+    this.loadDocumentsFromApi(null, viewType);
   }
 
   navigateToFolder(path: string, parentId?: string): void {
+    console.log('📁 Navegando para:', path, 'Parent ID:', parentId);
+
     this.currentPathSubject.next(path);
 
     // Atualizar o parentId atual
@@ -180,41 +230,15 @@ export class DocumentService {
       this.currentParentIdSubject.next(null); // Raiz
     }
 
-    this.setViewType('all');
-    this.loadDocumentsFromApi(this.currentParentIdSubject.value);
-  }
-
-  private filterDocuments(): void {
-    const viewType = this.viewTypeSubject.value;
-
-    switch (viewType) {
-      case 'starred':
-        const currentDocs = this.documentsSubject.value;
-        const starredDocs = currentDocs.filter(doc => doc.starred);
-        this.documentsSubject.next(starredDocs);
-        break;
-      case 'recent':
-        const allDocs = this.documentsSubject.value;
-        const recentDocs = allDocs.filter(doc => {
-          const diffTime = Math.abs(new Date().getTime() - doc.modifiedAt.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return diffDays <= 7;
-        });
-        this.documentsSubject.next(recentDocs);
-        break;
-      case 'trash':
-        this.documentsSubject.next([]);
-        break;
-      default:
-        this.loadDocumentsFromApi(this.currentParentIdSubject.value);
-        break;
-    }
+    // Sempre voltar para view 'all' quando navegando por pastas
+    this.viewTypeSubject.next('all');
+    this.loadDocumentsFromApi(this.currentParentIdSubject.value, 'all');
   }
 
   /**
-   * Criar pasta usando a API
+   * Criar pasta usando a API - RETORNA PROMISE
    */
-  createFolder(name: string): void {
+  async createFolder(name: string): Promise<{ success: boolean; message: string }> {
     console.log('🔄 Criando pasta via API:', name);
 
     const createData = {
@@ -223,24 +247,35 @@ export class DocumentService {
       parent_id: this.currentParentIdSubject.value
     };
 
-    this.http.post<ApiResponse<ApiFile>>(this.baseUrl, createData)
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Pasta criada com sucesso:', response);
+    try {
+      const response = await firstValueFrom(
+        this.http.post<ApiResponse<ApiFile>>(this.baseUrl, createData)
+      );
 
-          if (response.success) {
-            this.loadDocumentsFromApi(this.currentParentIdSubject.value);
-            alert(`Pasta "${name}" criada com sucesso!`);
-          } else {
-            console.error('❌ Erro na resposta da API:', response.message);
-            alert(`Erro ao criar pasta: ${response.message}`);
-          }
-        },
-        error: (error) => {
-          console.error('❌ Erro ao criar pasta:', error);
-          alert(`Erro na API ao criar pasta: ${error.message}`);
-        }
-      });
+      console.log('✅ Resposta da criação de pasta:', response);
+
+      if (response.success) {
+        // Recarregar a lista atual
+        this.reloadCurrentView();
+
+        return {
+          success: true,
+          message: `Pasta "${name}" criada com sucesso!`
+        };
+      } else {
+        console.error('❌ Erro na resposta da API:', response.message);
+        return {
+          success: false,
+          message: response.message || 'Erro ao criar pasta'
+        };
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao criar pasta:', error);
+      return {
+        success: false,
+        message: `Erro na API: ${error.message}`
+      };
+    }
   }
 
   /**
@@ -253,7 +288,7 @@ export class DocumentService {
 
     this.http.put<ApiResponse<ApiFile>>(url, {})
       .subscribe({
-        next: (response) => {
+        next: async (response) => {
           console.log('✅ Estrela alternada com sucesso:', response);
 
           if (response.success) {
@@ -269,14 +304,19 @@ export class DocumentService {
 
             const action = response.data.starred ? 'favoritado' : 'desfavoritado';
             console.log(`📋 Documento ${action}:`, response.data.name);
+
+            // Se estamos na view de favoritos e o item foi desfavoritado, removê-lo da lista
+            if (this.viewTypeSubject.value === 'starred' && !response.data.starred) {
+              this.reloadCurrentView();
+            }
           } else {
             console.error('❌ Erro na resposta da API:', response.message);
-            alert(`Erro ao favoritar: ${response.message}`);
+            await this.modalService.showError(`Erro ao favoritar: ${response.message}`);
           }
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('❌ Erro ao alternar estrela:', error);
-          alert(`Erro na API ao favoritar: ${error.message}`);
+          await this.modalService.showError(`Erro na API ao favoritar: ${error.message}`);
         }
       });
   }
@@ -291,7 +331,7 @@ export class DocumentService {
 
     this.http.delete<ApiResponse<any>>(url)
       .subscribe({
-        next: (response) => {
+        next: async (response) => {
           console.log('✅ Documento excluído com sucesso:', response);
 
           if (response.success) {
@@ -300,23 +340,24 @@ export class DocumentService {
             const filteredDocs = currentDocs.filter(doc => doc.id !== documentId);
             this.documentsSubject.next(filteredDocs);
 
-            console.log('🗑️ Documento removido da lista');
+            await this.modalService.showSuccess('Arquivo movido para lixeira com sucesso!');
+            console.log('🗑️ Documento movido para lixeira');
           } else {
             console.error('❌ Erro na resposta da API:', response.message);
-            alert(`Erro ao excluir: ${response.message}`);
+            await this.modalService.showError(`Erro ao excluir: ${response.message}`);
           }
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('❌ Erro ao excluir documento:', error);
-          alert(`Erro na API ao excluir: ${error.message}`);
+          await this.modalService.showError(`Erro na API ao excluir: ${error.message}`);
         }
       });
   }
 
   /**
-   * Upload de arquivo real usando a API
+   * Upload de arquivo real usando a API - RETORNA PROMISE
    */
-  uploadFile(file: File): void {
+  async uploadFile(file: File): Promise<{ success: boolean; message: string }> {
     console.log('🔄 Fazendo upload real via API:', file.name);
 
     // Criar FormData para upload
@@ -331,31 +372,41 @@ export class DocumentService {
       formData.append('parent_id', currentParentId.toString());
     }
 
-    this.http.post<ApiResponse<ApiFile>>(this.baseUrl, formData)
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Upload realizado com sucesso:', response);
+    try {
+      const response = await firstValueFrom(
+        this.http.post<ApiResponse<ApiFile>>(this.baseUrl, formData)
+      );
 
-          if (response.success) {
-            // Recarregar a lista de documentos
-            this.loadDocumentsFromApi(this.currentParentIdSubject.value);
-            alert(`Arquivo "${file.name}" enviado com sucesso!`);
-          } else {
-            console.error('❌ Erro na resposta da API:', response.message);
-            alert(`Erro no upload: ${response.message}`);
-          }
-        },
-        error: (error) => {
-          console.error('❌ Erro no upload:', error);
-          alert(`Erro no upload: ${error.message}`);
-        }
-      });
+      console.log('✅ Upload realizado com sucesso:', response);
+
+      if (response.success) {
+        // Recarregar a lista atual
+        this.reloadCurrentView();
+
+        return {
+          success: true,
+          message: `Arquivo "${file.name}" enviado com sucesso!`
+        };
+      } else {
+        console.error('❌ Erro na resposta da API:', response.message);
+        return {
+          success: false,
+          message: response.message || 'Erro no upload'
+        };
+      }
+    } catch (error: any) {
+      console.error('❌ Erro no upload:', error);
+      return {
+        success: false,
+        message: `Erro no upload: ${error.message}`
+      };
+    }
   }
 
   /**
-   * Criar documento Google usando a API
+   * Criar documento Google usando a API - RETORNA PROMISE
    */
-  createGoogleDocument(name: string, type: 'document' | 'spreadsheet' | 'presentation'): void {
+  async createGoogleDocument(name: string, type: 'document' | 'spreadsheet' | 'presentation'): Promise<{ success: boolean; message: string }> {
     console.log('🔄 Criando documento Google via API:', name, type);
 
     const createData = {
@@ -364,24 +415,113 @@ export class DocumentService {
       parent_id: this.currentParentIdSubject.value
     };
 
-    this.http.post<ApiResponse<ApiFile>>(this.baseUrl, createData)
+    try {
+      const response = await firstValueFrom(
+        this.http.post<ApiResponse<ApiFile>>(this.baseUrl, createData)
+      );
+
+      console.log('✅ Documento Google criado com sucesso:', response);
+
+      if (response.success) {
+        // Recarregar a lista atual
+        this.reloadCurrentView();
+
+        return {
+          success: true,
+          message: `${this.getDocumentTypeName(type)} "${name}" criado com sucesso!`
+        };
+      } else {
+        console.error('❌ Erro na resposta da API:', response.message);
+        return {
+          success: false,
+          message: response.message || 'Erro ao criar documento'
+        };
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao criar documento Google:', error);
+      return {
+        success: false,
+        message: `Erro na API: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Restaurar documento da lixeira
+   */
+  restoreDocument(documentId: string): void {
+    console.log('🔄 Restaurando documento via API:', documentId);
+
+    const url = `${this.baseUrl}/${documentId}/restore`;
+
+    this.http.put<ApiResponse<any>>(url, {})
       .subscribe({
-        next: (response) => {
-          console.log('✅ Documento Google criado com sucesso:', response);
+        next: async (response) => {
+          console.log('✅ Documento restaurado com sucesso:', response);
 
           if (response.success) {
-            this.loadDocumentsFromApi(this.currentParentIdSubject.value);
-            alert(`${this.getDocumentTypeName(type)} "${name}" criado com sucesso!`);
+            // Remover o documento da lista da lixeira
+            const currentDocs = this.documentsSubject.value;
+            const filteredDocs = currentDocs.filter(doc => doc.id !== documentId);
+            this.documentsSubject.next(filteredDocs);
+
+            await this.modalService.showSuccess('Arquivo restaurado com sucesso!');
+            console.log('📋 Documento restaurado e removido da lixeira');
           } else {
             console.error('❌ Erro na resposta da API:', response.message);
-            alert(`Erro ao criar documento: ${response.message}`);
+            await this.modalService.showError(`Erro ao restaurar: ${response.message}`);
           }
         },
-        error: (error) => {
-          console.error('❌ Erro ao criar documento Google:', error);
-          alert(`Erro na API ao criar documento: ${error.message}`);
+        error: async (error) => {
+          console.error('❌ Erro ao restaurar documento:', error);
+          await this.modalService.showError(`Erro na API ao restaurar: ${error.message}`);
         }
       });
+  }
+
+  /**
+   * Excluir documento permanentemente
+   */
+  permanentDeleteDocument(documentId: string): void {
+    console.log('🔄 Excluindo permanentemente via API:', documentId);
+
+    const url = `${this.baseUrl}/${documentId}/permanent`;
+
+    this.http.delete<ApiResponse<any>>(url)
+      .subscribe({
+        next: async (response) => {
+          console.log('✅ Documento excluído permanentemente:', response);
+
+          if (response.success) {
+            // Remover o documento da lista
+            const currentDocs = this.documentsSubject.value;
+            const filteredDocs = currentDocs.filter(doc => doc.id !== documentId);
+            this.documentsSubject.next(filteredDocs);
+
+            await this.modalService.showSuccess('Arquivo excluído permanentemente!');
+            console.log('🗑️ Documento removido permanentemente');
+          } else {
+            console.error('❌ Erro na resposta da API:', response.message);
+            await this.modalService.showError(`Erro ao excluir permanentemente: ${response.message}`);
+          }
+        },
+        error: async (error) => {
+          console.error('❌ Erro ao excluir permanentemente:', error);
+          await this.modalService.showError(`Erro na API ao excluir permanentemente: ${error.message}`);
+        }
+      });
+  }
+
+  /**
+   * Recarregar a visualização atual (favoritos, lixeira, etc.)
+   */
+  private reloadCurrentView(): void {
+    const currentViewType = this.viewTypeSubject.value;
+    const currentParentId = this.currentParentIdSubject.value;
+
+    console.log('🔄 Recarregando visualização atual:', currentViewType);
+
+    this.loadDocumentsFromApi(currentParentId, currentViewType);
   }
 
   /**
@@ -394,33 +534,6 @@ export class DocumentService {
       case 'presentation': return 'Apresentação';
       default: return 'Documento';
     }
-  }
-
-  /**
-   * Upload simulado (REMOVIDO - não usar mais)
-   * @deprecated Use createGoogleDocument() para documentos Google
-   */
-  uploadFileSimulated(file: {name: string, type: string, size: number}): void {
-    console.warn('⚠️ uploadFileSimulated() está deprecated. Use createGoogleDocument()');
-
-    // Fallback para não quebrar se ainda for chamado
-    const newFile: Document = {
-      id: Date.now().toString(),
-      name: file.name,
-      type: this.getDocumentTypeFromFileName(file.name),
-      size: file.size,
-      modifiedAt: new Date(),
-      createdAt: new Date(),
-      owner: 'Eu',
-      path: this.currentPathSubject.value,
-      starred: false,
-      shared: false
-    };
-
-    const currentDocs = this.documentsSubject.value;
-    this.documentsSubject.next([...currentDocs, newFile]);
-
-    alert(`Arquivo "${file.name}" adicionado (simulação local - NÃO SALVO NO BANCO)`);
   }
 
   /**
@@ -439,39 +552,11 @@ export class DocumentService {
   }
 
   /**
-   * Determinar tipo do documento baseado no nome do arquivo
-   */
-  private getDocumentTypeFromFileName(fileName: string): 'document' | 'spreadsheet' | 'presentation' | 'image' | 'pdf' {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-
-    switch (extension) {
-      case 'doc':
-      case 'docx':
-        return 'document';
-      case 'xls':
-      case 'xlsx':
-        return 'spreadsheet';
-      case 'ppt':
-      case 'pptx':
-        return 'presentation';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return 'image';
-      case 'pdf':
-        return 'pdf';
-      default:
-        return 'document';
-    }
-  }
-
-  /**
    * Pesquisar documentos (local por enquanto)
    */
   searchDocuments(query: string): void {
     if (!query || query.trim() === '') {
-      this.loadDocumentsFromApi(this.currentParentIdSubject.value);
+      this.reloadCurrentView();
       return;
     }
 
@@ -531,18 +616,22 @@ export class DocumentService {
     // Por enquanto, vamos navegar para raiz
     this.navigateToFolder('/', undefined);
   }
+
+  /**
+   * Teste de conexão com API
+   */
   testApiConnection(): void {
     console.log('🔍 Testando conexão com API...');
 
     this.http.get<ApiResponse<any>>(this.baseUrl.replace('/files', '/health'))
       .subscribe({
-        next: (response) => {
+        next: async (response) => {
           console.log('✅ API funcionando!', response);
-          alert('API conectada com sucesso!');
+          await this.modalService.showSuccess('API conectada com sucesso!');
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('❌ API não está funcionando:', error);
-          alert('API não está funcionando. Verifique se está rodando em http://localhost:3000');
+          await this.modalService.showError('API não está funcionando. Verifique se está rodando em http://localhost:3333');
         }
       });
   }

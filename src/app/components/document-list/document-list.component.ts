@@ -34,9 +34,13 @@ export class DocumentListComponent implements OnInit {
   }
 
   openDocument(doc: Document): void {
+    // Na lixeira, não permitir abrir documentos
+    if (this.viewType === 'trash') {
+      return;
+    }
+
     if (doc.type === 'folder') {
       console.log('📁 Abrindo pasta:', doc.name);
-      // Usar o novo método openFolder do service
       this.documentService.openFolder(doc);
     } else {
       console.log('📄 Abrindo documento:', doc.name);
@@ -60,6 +64,75 @@ export class DocumentListComponent implements OnInit {
         return 'Lixeira';
       default:
         return 'Meu Drive';
+    }
+  }
+
+  getViewTypeIcon(): string {
+    switch (this.viewType) {
+      case 'recent':
+        return 'schedule';
+      case 'starred':
+        return 'star';
+      case 'trash':
+        return 'delete';
+      default:
+        return 'folder';
+    }
+  }
+
+  getViewTypeDescription(): string {
+    switch (this.viewType) {
+      case 'recent':
+        return 'Arquivos modificados nos últimos 7 dias';
+      case 'starred':
+        return 'Seus arquivos favoritados';
+      case 'trash':
+        return 'Arquivos excluídos';
+      default:
+        return '';
+    }
+  }
+
+  getEmptyStateIcon(): string {
+    switch (this.viewType) {
+      case 'recent':
+        return 'schedule';
+      case 'starred':
+        return 'star_border';
+      case 'trash':
+        return 'delete_outline';
+      default:
+        return 'folder_open';
+    }
+  }
+
+  getEmptyStateTitle(): string {
+    switch (this.viewType) {
+      case 'all':
+        return this.currentPath === '/'
+          ? 'Nenhum item encontrado nesta pasta'
+          : `A pasta "${this.getViewTypeTitle()}" está vazia`;
+      case 'recent':
+        return 'Nenhum arquivo recente';
+      case 'starred':
+        return 'Nenhum arquivo favoritado';
+      case 'trash':
+        return 'Lixeira vazia';
+      default:
+        return 'Nenhum item encontrado';
+    }
+  }
+
+  getEmptyStateMessage(): string {
+    switch (this.viewType) {
+      case 'recent':
+        return 'Arquivos que você modificou recentemente aparecerão aqui.';
+      case 'starred':
+        return 'Clique na estrela ao lado dos arquivos para favoritá-los.';
+      case 'trash':
+        return 'Arquivos excluídos ficam aqui por 30 dias antes de serem removidos permanentemente.';
+      default:
+        return 'Esta pasta está vazia.';
     }
   }
 

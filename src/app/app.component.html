@@ -1,20 +1,27 @@
-<app-header></app-header>
+ <app-header></app-header>
 
-<div class="d-flex vh-100">
-  <!-- Sidebar fixa -->
-  <div class="position-fixed top-0 start-0 bg-white border-end"
-       style="margin-top: 64px; width: 256px; height: calc(100vh - 64px); z-index: 1000;">
-    <app-sidebar></app-sidebar>
-  </div>
+    <div class="d-flex vh-100">
+      <!-- Sidebar fixa -->
+      <div class="position-fixed top-0 start-0 bg-white border-end"
+           style="margin-top: 64px; width: 256px; height: calc(100vh - 64px); z-index: 1000;">
+        <app-sidebar></app-sidebar>
+      </div>
 
-  <!-- Conteúdo principal -->
-  <div class="flex-grow-1 d-flex flex-column bg-light"
-       style="margin-left: 256px;">
-    <app-toolbar></app-toolbar>
-    <div class="flex-grow-1 overflow-auto">
-      <app-document-list></app-document-list>
+      <!-- Conteúdo principal -->
+      <div class="flex-grow-1 d-flex flex-column bg-light"
+           style="margin-left: 256px;">
+        <app-toolbar></app-toolbar>
+        <div class="flex-grow-1 overflow-auto">
+          <app-document-list></app-document-list>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<router-outlet></router-outlet>
+    <!-- Modal Global -->
+    <app-modal
+      [isOpen]="(modalService.modalState$ | async)?.isOpen || false"
+      [config]="(modalService.modalState$ | async)?.config || { title: '', type: 'alert' }"
+      (result)="onModalResult($event)">
+    </app-modal>
+
+    <router-outlet></router-outlet>
